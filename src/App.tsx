@@ -1,26 +1,89 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './App.scss'
+
+import {
+  Link,
+  Navigate,
+  Outlet,
+  ReactLocation,
+  Route,
+  Router
+} from 'react-location'
+import Posts from './pages/Posts'
+import Container from './Components/Container'
+import Menu from './Components/Menu'
+import Post from './pages/Post'
+import About from './pages/About'
+import Main from './pages/Main'
+
+const reactLocation = new ReactLocation()
+
+type MyRoue = Route & {
+  name: string
+}
+
+export const FIRST_LEVEL_ROUTES: MyRoue[] = [
+  {
+    path: 'posts',
+    name: 'Posts',
+    element: (
+      <Container>
+        <Outlet />
+      </Container>
+    ),
+    children: [
+      {
+        path: '/',
+        element: <Posts />
+      },
+      {
+        path: ':postId',
+        element: <Post />
+      },
+      { element: <Navigate to="/" /> }
+    ]
+  },
+  { path: 'about', name: 'About', element: <About /> }
+]
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <Router
+      location={reactLocation}
+      routes={[
+        {
+          path: '',
+          element: <Main />
+        },
+        ...FIRST_LEVEL_ROUTES,
+        {
+          element: '404'
+        }
+      ]}
+    >
+      <div className="layout spread">
+        <Menu>
+          <Link to="/">Test-app</Link>
+          <ul className="navbar">
+            {FIRST_LEVEL_ROUTES.map(({ path, name }) => {
+              return (
+                <li key={path}>
+                  <Link
+                    to={path}
+                    getActiveProps={() => ({
+                      className: 'active'
+                    })}
+                  >
+                    {name}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </Menu>
+        <Outlet />
+      </div>
+    </Router>
+  )
 }
 
-export default App;
+export default App
